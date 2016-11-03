@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Steven的技术博客</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2016-11-02T09:24:21.619Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>Steven</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>js正则表达式RegExp</title>
+    <link href="http://yoursite.com/frontend/20161102/"/>
+    <id>http://yoursite.com/frontend/20161102/</id>
+    <published>2016-11-02T09:16:44.000Z</published>
+    <updated>2016-11-02T09:24:21.619Z</updated>
+    
+    <content type="html"><![CDATA[<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
+<hr>
+<h2 id="正则表达式语法"><a href="#正则表达式语法" class="headerlink" title="正则表达式语法"></a>正则表达式语法</h2><p>匹配单个字符：</p>
+<ol>
+<li>在正则表达式中，如果直接给出字符，就是精确匹配</li>
+<li>用 <code>\d</code>可以匹配一个数字，<code>\w</code> 可以匹配一个字母或数字,<code>\s</code>可以匹配一个空格（也包括Tab等空白符）</li>
+<li><code>.</code>可以匹配任意一个字符</li>
+</ol>
+<p>匹配变长字符：</p>
+<ol>
+<li><code>*</code> 表示任意个字符（包括0个）</li>
+<li><code>+</code> 表示至少一个字符</li>
+<li><code>?</code> 表示0个或1个字符</li>
+<li><code>{n}</code> 表示n个字符</li>
+<li><code>{n,m}</code>  表示n-m个字符</li>
+</ol>
+<p>看懂了上面这些语法，应该可以很容易的看懂下面的例子：<br><code>00\d</code>可以匹配<code>007</code>，但无法匹配<code>00A</code>；<br><code>\d\d\d</code>可以匹配<code>010</code>；<br><code>\w\w</code>可以匹配<code>js</code>；<br><code>js.</code>可以匹配<code>jsp</code>、<code>jss</code>、<code>js!</code>等等。</p>
+<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code><br>我们来从左到右解读一下：</p>
+<ol>
+<li><code>\d{3}</code>表示匹配3个数字，例如<code>010</code>；</li>
+<li><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39;  &#39;</code>，<code>\t\t</code>等；</li>
+<li><code>\d{3,8}</code>表示3-8个数字，例如<code>1234567</code>。<br>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。如<code>010 1234567</code>。但是如果要匹配<code>010-12345</code>这样的号码呢？由于<code>-</code>是特殊字符，在正则表达式中，要用<code>\</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</li>
+</ol>
+<p>正则表达式进阶</p>
+<ol>
+<li><code>[]</code>表示范围</li>
+<li><code>|</code>表示或者，<code>A|B</code>可以匹配A或B</li>
+<li><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头</li>
+<li><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束</li>
+</ol>
+<p>现在下面的正则表达式也没有问题了把…</p>
+<ol>
+<li><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</li>
+<li><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>a100</code>，<code>0_Z</code>，<code>js2015</code>等等；</li>
+<li><code>[a-zA-Z\_\$][0-9a-zA-Z\_\$]*</code>可以匹配由字母或下划线、<code>$</code>开头，后接任意个由一个数字、字母或者下划线、<code>$</code>组成的字符串，也就是JavaScript允许的变量名；</li>
+<li><code>[a-zA-Z\_\$][0-9a-zA-Z\_\$]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</li>
+<li><code>A|B</code>可以匹配<code>A</code>或<code>B</code>，所以<code>(J|j)ava(S|s)cript</code>可以匹配<code>JavaScript</code>、<code>Javascript</code>、<code>javaScript</code>或者<code>javascript</code>。</li>
+</ol>
+<h2 id="RegExp"><a href="#RegExp" class="headerlink" title="RegExp"></a>RegExp</h2><p>熟悉了正则表达式的语法，我们就可以在JavaScript中使用正则表达式了。</p>
+<p>JavaScript有两种方式创建一个正则表达式：<br>第一种方式是直接通过/正则表达式/写出来，<br>第二种方式是通过new RegExp(‘正则表达式’)创建一个RegExp对象<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> re1 = <span class="regexp">/ABC\-001/</span>;</div><div class="line"><span class="keyword">var</span> re2 = <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">'ABC\\-001'</span>)</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p><strong>注</strong>: 如果使用第二种写法，因为字符串的转义问题，字符串的两个\实际上是一个<code>\</code>。</p>
+</blockquote>
+<h3 id="验证正则表达式是否匹配"><a href="#验证正则表达式是否匹配" class="headerlink" title="验证正则表达式是否匹配"></a>验证正则表达式是否匹配</h3><p>RegExp对象的test()方法用于测试给定的字符串是否符合条件<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> re = <span class="regexp">/^\d&#123;3&#125;\-\d&#123;3,8&#125;$/</span>;</div><div class="line">re.test(<span class="string">'010-12345'</span>); <span class="comment">// true</span></div><div class="line">re.test(<span class="string">'010-1234x'</span>); <span class="comment">// false</span></div><div class="line">re.test(<span class="string">'010 12345'</span>); <span class="comment">// false</span></div></pre></td></tr></table></figure></p>
+<h3 id="切分字符串"><a href="#切分字符串" class="headerlink" title="切分字符串"></a>切分字符串</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 无法识别连续的空格</span></div><div class="line"><span class="string">'a b   c'</span>.split(<span class="string">' '</span>); <span class="comment">// ['a', 'b', '', '', 'c']</span></div><div class="line"><span class="comment">// 无论多少个空格都可以正常分割</span></div><div class="line"><span class="string">'a b   c'</span>.split(<span class="regexp">/\s+/</span>); <span class="comment">// ['a', 'b', 'c']</span></div><div class="line"><span class="string">'a,b, c  d'</span>.split(<span class="regexp">/[\s\,]+/</span>); <span class="comment">// ['a', 'b', 'c', 'd']</span></div><div class="line"><span class="string">'a,b;; c  d'</span>.split(<span class="regexp">/[\s\,\;]+/</span>); <span class="comment">// ['a', 'b', 'c', 'd']</span></div></pre></td></tr></table></figure>
+<h3 id="分组-子串"><a href="#分组-子串" class="headerlink" title="分组(子串)"></a>分组(子串)</h3><p>除了简单地判断是否匹配之外，正则表达式还有提取子串的强大功能。用<code>()</code>表示的就是要提取的分组（Group）。比如：<code>^(\d{3})-(\d{3,8})$</code>分别定义了两个组，可以直接从匹配的字符串中提取出区号和本地号码：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> re = <span class="regexp">/^(\d&#123;3&#125;)-(\d&#123;3,8&#125;)$/</span>;</div><div class="line">re.exec(<span class="string">'010-12345'</span>); </div><div class="line"><span class="comment">//[ '010-12345', '010', '12345', index: 0, input: '010-12345' ]</span></div><div class="line"></div><div class="line">re.exec(<span class="string">'010 12345'</span>); <span class="comment">// null</span></div></pre></td></tr></table></figure></p>
+<p>如果正则表达式中定义了f分组就可以在RegExp对象上用<code>exec()</code>方法提取出子串来。</p>
+<p><code>exec()</code>方法在匹配成功后，会返回一个<code>Array</code>，第一个元素是正则表达式匹配到的整个字符串，后面的字符串表示匹配成功的子串。<br><code>exec()</code>方法在匹配失败时返回<code>null</code>。</p>
+<h2 id="RegExp标志"><a href="#RegExp标志" class="headerlink" title="RegExp标志"></a>RegExp标志</h2><h3 id="贪婪匹配和非贪婪匹配"><a href="#贪婪匹配和非贪婪匹配" class="headerlink" title="贪婪匹配和非贪婪匹配"></a>贪婪匹配和非贪婪匹配</h3><p>需要特别指出的是，正则匹配默认是贪婪匹配，也就是匹配尽可能多的字符。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> re = <span class="regexp">/^(\d+)(0*)$/</span>;</div><div class="line">re.exec(<span class="string">'102300'</span>); </div><div class="line"><span class="comment">//[ '102300', '102300', '', index: 0, input: '102300' ]</span></div></pre></td></tr></table></figure></p>
+<p>由于<code>\d+</code>采用贪婪匹配，直接把后面的<code>0</code>全部匹配了，结果<code>0*</code>只能匹配空字符串了。</p>
+<p>必须让<code>\d+</code>采用非贪婪匹配（也就是尽可能少匹配），才能把后面的<code>0</code>匹配出来，加个?就可以让<code>\d+</code>采用非贪婪匹配：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> re = <span class="regexp">/^(\d+?)(0*)$/</span>;</div><div class="line"><span class="built_in">console</span>.log(re.exec(<span class="string">'102300'</span>)); </div><div class="line"><span class="comment">//[ '102300', '1023', '00', index: 0, input: '102300' ]</span></div></pre></td></tr></table></figure></p>
+<h3 id="全局匹配"><a href="#全局匹配" class="headerlink" title="全局匹配"></a>全局匹配</h3><p><code>g</code>表示全局匹配：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> s = <span class="string">'JavaScript, VBScript, JScript and ECMAScript'</span>;</div><div class="line"><span class="keyword">var</span> re=<span class="regexp">/[a-zA-Z]+Script/g</span>;</div><div class="line"><span class="comment">// 使用全局匹配:</span></div><div class="line"><span class="built_in">console</span>.log(re.exec(s));</div><div class="line"><span class="comment">// [ 'JavaScript', index: 0, input: 'JavaScript, VBScript, JScript and ECMAScript' ]</span></div><div class="line"><span class="built_in">console</span>.log(re.lastIndex);<span class="comment">// 10</span></div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(re.exec(s));</div><div class="line"><span class="comment">// [ 'VBScript',index: 12,input: 'JavaScript, VBScript, JScript and ECMAScript' ]</span></div><div class="line"><span class="built_in">console</span>.log(re.lastIndex); <span class="comment">// 20</span></div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(re.exec(s));</div><div class="line"><span class="comment">// [ 'JScript',index: 22,input: 'JavaScript, VBScript, JScript and ECMAScript' ]</span></div><div class="line"><span class="built_in">console</span>.log(re.lastIndex); <span class="comment">// 29</span></div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(re.exec(s));</div><div class="line"><span class="comment">// [ 'ECMAScript',index: 34,input: 'JavaScript, VBScript, JScript and ECMAScript' ]</span></div><div class="line"><span class="built_in">console</span>.log(re.lastIndex); <span class="comment">// 44</span></div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(re.exec(s)); <span class="comment">// null，直到结束仍没有匹配到</span></div></pre></td></tr></table></figure></p>
+<p>全局匹配可以多次执行<code>exec()</code>方法来搜索一个匹配的字符串。当我们指定<code>g</code>标志后，每次运行<code>exec()</code>，正则表达式本身会更新<code>lastIndex</code>属性，表示上次匹配到的最后索引：</p>
+<p>全局匹配类似搜索，因此不能使用<code>/^...$/</code>，那样只会最多匹配一次。</p>
+<p>正则表达式还可以指定<code>i</code>标志，表示忽略大小写，<code>m</code>标志，表示执行多行匹配。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>正则表达式非常强大，要讲清楚正则的所有内容，可以写一本厚厚的书了。如果你经常遇到正则表达式的问题，你可能需要一本正则表达式的参考书。不过掌握了上面这些内容，已经足够你应付常见的正则表达式了。</p>
+<p>… 完结…</p>
+<h2 id="反馈与建议"><a href="#反馈与建议" class="headerlink" title="反馈与建议"></a>反馈与建议</h2><ul>
+<li>微博：<a href="http://weibo.com/u/5472985831" target="_blank" rel="external">@devSteven</a></li>
+<li>邮箱：<a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#58;&#99;&#114;&#97;&#x7a;&#121;&#98;&#x6f;&#x79;&#113;&#x69;&#x61;&#110;&#103;&#x40;&#x31;&#x36;&#51;&#x2e;&#99;&#111;&#109;">&#99;&#114;&#97;&#x7a;&#121;&#98;&#x6f;&#x79;&#113;&#x69;&#x61;&#110;&#103;&#x40;&#x31;&#x36;&#51;&#x2e;&#99;&#111;&#109;</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&quot;正则表达式语法&quot;&gt;&lt;a href=&quot;#正则表达式语法&quot; cla
+    
+    </summary>
+    
+      <category term="前台开发" scheme="http://yoursite.com/categories/frontend/"/>
+    
+    
+      <category term="JavaScript" scheme="http://yoursite.com/tags/JavaScript/"/>
+    
+      <category term="RegExp" scheme="http://yoursite.com/tags/RegExp/"/>
+    
+      <category term="正则表达式" scheme="http://yoursite.com/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Oracle数据库备份和还原(导入导出)</title>
+    <link href="http://yoursite.com/backend/20161101/"/>
+    <id>http://yoursite.com/backend/20161101/</id>
+    <published>2016-11-01T08:35:11.000Z</published>
+    <updated>2016-11-02T01:18:13.730Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库的备份还原和数据库的迁移，还可以实现快速搭建主从库。</p>
+<blockquote>
+<p><strong>注</strong>：导入导出dmp数据时需要有导出表的权限的用户，否则不能导出。</p>
+</blockquote>
+<hr>
+<h2 id="配置文件tnsname-ora"><a href="#配置文件tnsname-ora" class="headerlink" title="配置文件tnsname.ora"></a>配置文件tnsname.ora</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">SD_162 =</div><div class="line">  (DESCRIPTION =</div><div class="line">    (ADDRESS_LIST =</div><div class="line">      (ADDRESS = (PROTOCOL = TCP)(HOST = 172.16.10.162)(PORT = 1521))</div><div class="line">    )</div><div class="line">    (CONNECT_DATA =</div><div class="line">      (SID = ORCL)</div><div class="line">    )</div><div class="line">  )</div></pre></td></tr></table></figure>
+<p>SD_162 即是我们要使用的数据库的别名。</p>
+<h2 id="测试连接"><a href="#测试连接" class="headerlink" title="测试连接"></a>测试连接</h2><p>为了验证能否成功连接到数据库，可以使用tnsping命令测试一下连接，如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ tnsping SD_162</div></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">TNS Ping Utility <span class="keyword">for</span> 64-bit Windows: Version 11.2.0.3.0 - Production on 01-11月-2016 16:45:43</div><div class="line"></div><div class="line">Copyright (c) 1997, 2011, Oracle.  All rights reserved.</div><div class="line"></div><div class="line">已使用的参数文件:</div><div class="line">E:\Oracle\product\11.2.0\dbhome_1\network\admin\sqlnet.ora</div><div class="line"></div><div class="line"></div><div class="line">已使用 TNSNAMES 适配器来解析别名</div><div class="line">尝试连接 (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.16.1.162)(PORT = 1521))) (CONNECT_DATA = (SID = ORCL1)))</div><div class="line">OK (10 毫秒)</div></pre></td></tr></table></figure>
+<p>出现OK，即连接成功，接下来就可以开始导入导出了</p>
+<h2 id="数据库导出"><a href="#数据库导出" class="headerlink" title="数据库导出"></a>数据库导出</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 导出dmp文件</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp</div><div class="line"></div><div class="line">// 导出sql文件</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.sql</div><div class="line"></div><div class="line">// 全部导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp </div><div class="line">full=y</div><div class="line"></div><div class="line">// 将数据库中<span class="built_in">test</span>用户与<span class="built_in">test</span>1用户的表导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp owner=(<span class="built_in">test</span>,<span class="built_in">test</span>1)</div><div class="line"></div><div class="line">// 将数据库中的表table1 、table2导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp tables=(table1,table2)</div><div class="line"></div><div class="line">// 加入条件</div><div class="line">// 将数据库中的表table1中的字段filed1以<span class="string">"00"</span>打头的数据导出 </div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp tables=table1 query=\<span class="string">" where filed1 like '00%'\"</span></div></pre></td></tr></table></figure>
+<p> 上面是常用的导出，对于压缩，用winzip把dmp文件可以很好的压缩。不过在上面命令后面加上 compress=y  就可以了<br> 出现如下信息，没有警告的话，就是导出成功了。<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Export: Release 11.2.0.3.0 - Production on 星期二 11月 1 16:21:15 2016</div><div class="line"></div><div class="line">Copyright (c) 1982, 2011, Oracle and/or its affiliates.  All rights reserved.</div><div class="line"></div><div class="line"></div><div class="line">连接到: Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</div><div class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</div><div class="line">已导出 ZHS16GBK 字符集和 AL16UTF16 NCHAR 字符集</div><div class="line"></div><div class="line">即将导出指定的表通过常规路径...</div><div class="line">. . 正在导出表                            AA10导出了        4114 行</div><div class="line">成功终止导出, 没有出现警告。</div></pre></td></tr></table></figure></p>
+<h2 id="数据库导入"><a href="#数据库导入" class="headerlink" title="数据库导入"></a>数据库导入</h2><p> 将<strong>D:\sd1621101.dmp</strong>中的数据导入 TEST数据库中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// 下面可能有点问题，因为有的表已经存在，然后它就报错，忽略该表在后面加上 ignore=y 就可以了</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp full=y</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp ignore=y</div><div class="line"></div><div class="line">// 导入table1,table2表</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp tables=(table1,table2)</div></pre></td></tr></table></figure></p>
+<h2 id="利用PL-SQL-Developer工具"><a href="#利用PL-SQL-Developer工具" class="headerlink" title="利用PL/SQL Developer工具"></a>利用PL/SQL Developer工具</h2><p>菜单栏—-&gt;工具—-&gt;导入表/导出表，如下图，选好要导出的表，设置好导出文件即可<br><img src="/images/20161101/2222.PNG" alt="Alt text"></p>
+<p>… 完结…</p>
+<h2 id="反馈与建议"><a href="#反馈与建议" class="headerlink" title="反馈与建议"></a>反馈与建议</h2><ul>
+<li>微博：<a href="http://weibo.com/u/5472985831" target="_blank" rel="external">@devSteven</a></li>
+<li>邮箱：<a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#x3a;&#99;&#x72;&#97;&#122;&#x79;&#98;&#111;&#121;&#113;&#105;&#x61;&#x6e;&#x67;&#64;&#49;&#x36;&#x33;&#x2e;&#x63;&#111;&#109;">&#99;&#x72;&#97;&#122;&#x79;&#98;&#111;&#121;&#113;&#105;&#x61;&#x6e;&#x67;&#64;&#49;&#x36;&#x33;&#x2e;&#x63;&#111;&#109;</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库
+    
+    </summary>
+    
+      <category term="后台开发" scheme="http://yoursite.com/categories/backend/"/>
+    
+    
+      <category term="Oracle" scheme="http://yoursite.com/tags/Oracle/"/>
+    
+      <category term="数据库" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+      <category term="备份还原" scheme="http://yoursite.com/tags/%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Javascript模块化编程一</title>
+    <link href="http://yoursite.com/frontend/20161026/"/>
+    <id>http://yoursite.com/frontend/20161026/</id>
+    <published>2016-10-26T02:42:33.000Z</published>
+    <updated>2016-10-26T02:43:07.481Z</updated>
+    
+    <content type="html"><![CDATA[<p>随着网站逐渐变成”互联网应用程序”，嵌入网页的Javascript代码越来越庞大，越来越复杂。<br>Javascript模块化编程，已经成为一个迫切的需求。理想情况下，开发者只需要实现核心的业务逻辑，其他都可以加载别人已经写好的模块。</p>
+<hr>
+<h2 id="原始写法"><a href="#原始写法" class="headerlink" title="原始写法"></a>原始写法</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">m1</span>(<span class="params"></span>)</span>&#123;</div><div class="line">	<span class="comment">//...</span></div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">m2</span>(<span class="params"></span>)</span>&#123;</div><div class="line">	<span class="comment">//...</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面的函数m1()和m2()，组成一个模块。使用的时候，直接调用就行了。</p>
+<p>这种做法的缺点很明显：”污染”了全局变量，无法保证不与其他模块发生变量名冲突，而且模块成员之间看不出直接关系。</p>
+<h2 id="对象写法"><a href="#对象写法" class="headerlink" title="对象写法"></a>对象写法</h2><p>为了解决上面的缺点，可以把模块写成一个对象，所有的模块成员都放到这个对象里面。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> module1 = <span class="keyword">new</span> <span class="built_in">Object</span>(&#123;</div><div class="line">　　　　<span class="attr">_count</span> : <span class="number">0</span>,</div><div class="line">　　　　<span class="attr">m1</span> : <span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</div><div class="line">　　　　　　<span class="comment">//...</span></div><div class="line">　　　　&#125;,</div><div class="line">　　　　<span class="attr">m2</span> : <span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</div><div class="line">　　　　　　<span class="comment">//...</span></div><div class="line">　　　　&#125;</div><div class="line">　　&#125;);</div></pre></td></tr></table></figure></p>
+<p>上面的函数m1()和m2(），都封装在module1对象里。使用的时候，就是调用这个对象的属性。但是，这样的写法会暴露所有模块成员，内部状态可以被外部改写。比如，外部代码可以直接改变内部计数器的值。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">module1.m1();</div><div class="line">module1._count = <span class="number">5</span>;</div></pre></td></tr></table></figure></p>
+<h2 id="立即执行函数写法"><a href="#立即执行函数写法" class="headerlink" title="立即执行函数写法"></a>立即执行函数写法</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> module1 = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</div><div class="line">　　　　<span class="keyword">var</span> _count = <span class="number">0</span>;</div><div class="line">　　　　<span class="keyword">var</span> m1 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</div><div class="line">　　　　　　<span class="comment">//...</span></div><div class="line">　　　　&#125;;</div><div class="line">　　　　<span class="keyword">var</span> m2 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</div><div class="line">　　　　　　<span class="comment">//...</span></div><div class="line">　　　　&#125;;</div><div class="line">　　　　<span class="keyword">return</span> &#123;</div><div class="line">　　　　　　<span class="attr">m1</span> : m1,</div><div class="line">　　　　　　<span class="attr">m2</span> : m2</div><div class="line">　　　　&#125;;</div><div class="line">　　&#125;)();</div></pre></td></tr></table></figure>
+<p>使用上面的写法，外部代码无法读取内部的_count变量。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">　<span class="built_in">console</span>.info(module1._count); <span class="comment">//undefined</span></div></pre></td></tr></table></figure></p>
+<p>module1就是Javascript模块的基本写法。下面，再对这种写法进行加工。</p>
+<h2 id="放大模式"><a href="#放大模式" class="headerlink" title="放大模式"></a>放大模式</h2><p><strong>如果一个模块很大，必须分成几个部分</strong>，或者一个模块需要继承另一个模块，这时就有必要采用”放大模式”（augmentation）。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">　　<span class="keyword">var</span> module1 = (<span class="function"><span class="keyword">function</span> (<span class="params">mod</span>)</span>&#123;</div><div class="line">　　　　mod.m3 = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">　　　　　　<span class="comment">//...</span></div><div class="line">　　　　&#125;;</div><div class="line">　　　　<span class="keyword">return</span> mod;</div><div class="line">　　&#125;)(module1);</div></pre></td></tr></table></figure></p>
+<p>上面的代码为module1模块添加了一个新方法m3()，然后返回新的module1模块。</p>
+<h2 id="宽放大模式（Loose-augmentation）"><a href="#宽放大模式（Loose-augmentation）" class="headerlink" title="宽放大模式（Loose augmentation）"></a>宽放大模式（Loose augmentation）</h2><p>在浏览器环境中，模块的各个部分通常都是从网上获取的，有时无法知道哪个部分会先加载。如果采用上一节的写法，第一个执行的部分有可能加载一个不存在空对象，这时就要采用”宽放大模式”。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> module1 = ( <span class="function"><span class="keyword">function</span> (<span class="params">mod</span>)</span>&#123;</div><div class="line">　　　　<span class="comment">//...</span></div><div class="line">　　　　<span class="keyword">return</span> mod;</div><div class="line">　　 &#125;)(<span class="built_in">window</span>.module1 || &#123;&#125;);</div></pre></td></tr></table></figure></p>
+<p>与”放大模式”相比，＂宽放大模式＂就是”立即执行函数”的参数可以是空对象。</p>
+<h2 id="输入全局变量"><a href="#输入全局变量" class="headerlink" title="输入全局变量"></a>输入全局变量</h2><p>独立性是模块的重要特点，模块内部最好不与程序的其他部分直接交互。<br>为了在模块内部调用全局变量，必须显式地将其他变量输入模块。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> module1 = (<span class="function"><span class="keyword">function</span> (<span class="params">$</span>) </span>&#123;</div><div class="line">　　　　<span class="comment">//...</span></div><div class="line">　　 &#125;)(jQuery);</div></pre></td></tr></table></figure></p>
+<p>上面的module1模块需要使用jQuery库和YUI库，就把这两个库（其实是两个模块）当作参数输入module1。<strong>这样做除了保证模块的独立性，还使得模块之间的依赖关系变得明显。</strong></p>
+<p>… 未完待续…</p>
+<h2 id="反馈与建议"><a href="#反馈与建议" class="headerlink" title="反馈与建议"></a>反馈与建议</h2><ul>
+<li>微博：<a href="http://weibo.com/u/5472985831" target="_blank" rel="external">@devSteven</a></li>
+<li>邮箱：<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#x6f;&#58;&#99;&#114;&#97;&#x7a;&#121;&#98;&#111;&#x79;&#x71;&#105;&#x61;&#110;&#103;&#64;&#49;&#54;&#51;&#46;&#99;&#x6f;&#109;">&#99;&#114;&#97;&#x7a;&#121;&#98;&#111;&#x79;&#x71;&#105;&#x61;&#110;&#103;&#64;&#49;&#54;&#51;&#46;&#99;&#x6f;&#109;</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;随着网站逐渐变成”互联网应用程序”，嵌入网页的Javascript代码越来越庞大，越来越复杂。&lt;br&gt;Javascript模块化编程，已经成为一个迫切的需求。理想情况下，开发者只需要实现核心的业务逻辑，其他都可以加载别人已经写好的模块。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&quot;原
+    
+    </summary>
+    
+      <category term="前台开发" scheme="http://yoursite.com/categories/frontend/"/>
+    
+    
+      <category term="Javascript" scheme="http://yoursite.com/tags/Javascript/"/>
+    
+      <category term="模块化" scheme="http://yoursite.com/tags/%E6%A8%A1%E5%9D%97%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>菜鸟学习Webpack</title>
+    <link href="http://yoursite.com/frontend/20161025/"/>
+    <id>http://yoursite.com/frontend/20161025/</id>
+    <published>2016-10-25T05:39:33.000Z</published>
+    <updated>2016-10-26T01:15:22.260Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="webpack简介"><a href="#webpack简介" class="headerlink" title="webpack简介"></a>webpack简介</h2><h3 id="为什么要使用webpack"><a href="#为什么要使用webpack" class="headerlink" title="为什么要使用webpack"></a>为什么要使用webpack</h3><p><img src="/images/1/1.PNG" alt="Alt text"></p>
+<p>现今的很多网页其实可以看做是功能丰富的应用，它们拥有着复杂的JavaScript代码和一大堆依赖包。为了简化开发的复杂度，前端社区涌现出了很多好的实践方法</p>
+<ul>
+<li><strong>模块化</strong>，让我们可以把复杂的程序细化为小的文件;</li>
+<li>类似于TypeScript这种在JavaScript基础上拓展的开发语言：使我们能够实现目前版本的JavaScript不能直接使用的特性，并且之后还能能装换为JavaScript文件使浏览器可以识别；</li>
+<li>Scss，less等CSS预处理器</li>
+<li>…<br>这些改进确实大大的提高了我们的开发效率，但是利用它们开发的文件往往需要进行额外的处理才能让浏览器识别,而手动处理又是非常反锁的，这就为WebPack类的工具的出现提供了需求。</li>
+</ul>
+<hr>
+<h3 id="什么是webpack"><a href="#什么是webpack" class="headerlink" title="什么是webpack"></a>什么是webpack</h3><p>webpack是一个模块打包机，主要用途是打包js文件在浏览器中使用，不仅如此，她还能编译（transforming）、打包处理依赖（bundling）以及打包各种各样的资源和静态文件。<br>她主要做的事情是，分析你的项目结构，找到JavaScript模块以及其它的一些浏览器不能直接运行的拓展语言（Scss，TypeScript等），并将其打包为合适的格式以供浏览器使用。</p>
+<h3 id="WebPack和Grunt以及Gulp相比有什么特性"><a href="#WebPack和Grunt以及Gulp相比有什么特性" class="headerlink" title="WebPack和Grunt以及Gulp相比有什么特性"></a>WebPack和Grunt以及Gulp相比有什么特性</h3><p>其实Webpack和另外两个并没有太多的可比性，Gulp/Grunt是一种能够优化前端的开发流程的工具，而WebPack是一种模块化的解决方案，不过Webpack的优点使得Webpack可以替代Gulp/Grunt类的工具。</p>
+<p>Grunt和Gulp的工作方式是：在一个配置文件中，指明对某些文件进行类似编译，组合，压缩等任务的具体步骤，这个工具之后可以自动替你完成这些任务。<br><img src="/images/1/2.png" alt="Alt text"><br>Webpack的工作方式是：把你的项目当做一个整体，通过一个给定的主文件（如：index.js），Webpack将从这个文件开始找到你的项目的所有依赖文件，使用loaders处理它们，最后打包为一个浏览器可识别的JavaScript文件。<br><img src="/images/1/3.PNG" alt="Alt text"></p>
+<h2 id="webpack安装"><a href="#webpack安装" class="headerlink" title="webpack安装"></a>webpack安装</h2><p>webpack可以使用Node.js的包管理工具npm进行安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">// 全局安装</div><div class="line">$ npm install webpack -g</div><div class="line"></div><div class="line">// 在项目中安装使用</div><div class="line">$ npm install webpack --save-dev</div></pre></td></tr></table></figure></p>
+<p>在你的项目中作为依赖来安装和使用webpack是官方推荐的最好方式，全局安装只是为了方便命令行中使用。</p>
+<h2 id="webpack使用"><a href="#webpack使用" class="headerlink" title="webpack使用"></a>webpack使用</h2><p>使用前的准备:新建一个空的练习文件夹（此处命名为webpackdemo），在终端中转到该文件夹后在项目中安装webpack。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// 创建项目目录</div><div class="line">$ mkdir webpackdemo</div><div class="line">$ <span class="built_in">cd</span> webpackdemo</div><div class="line">// 创建package.json文件</div><div class="line">$ npm init</div><div class="line">// 在项目中安装使用</div><div class="line">$ npm install webpack --save-dev</div></pre></td></tr></table></figure></p>
+<p>回到之前的空文件夹，并在里面创建两个文件夹,app文件夹和public文件夹，app文件夹用来存放原始数据和我们将写的JavaScript模块，public文件夹用来存放准备给浏览器读取的数据（包括使用webpack生成的打包后的js文件以及一个index.html文件）。在这里还需要创建三个文件，index.html 文件放在public文件夹中，两个js文件（Greeter.js和main.js）放在app文件夹中，此时项目结构如下图所示<br><img src="/images/1/4.PNG" alt="Alt text"></p>
+<p>index.html文件只有最基础的html代码，它唯一的目的就是加载打包后的js文件（bundle.js）<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html&gt;</div><div class="line">&lt;html lang="en"&gt;</div><div class="line">  &lt;head&gt;</div><div class="line">    &lt;meta charset="utf-8"&gt;</div><div class="line">    &lt;title&gt;Webpack Sample Project&lt;/title&gt;</div><div class="line">  &lt;/head&gt;</div><div class="line">  &lt;body&gt;</div><div class="line">    &lt;div id='root'&gt;</div><div class="line">    &lt;/div&gt;</div><div class="line">    &lt;script src="bundle.js"&gt;&lt;/script&gt;</div><div class="line">  &lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure></p>
+<p>Greeter.js只包括一个用来返回包含问候信息的html元素的函数。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Greeter.js</span></div><div class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> Greet = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</div><div class="line">  Greet.textContent = <span class="string">"Hi there and Greetings!"</span>;</div><div class="line">  <span class="keyword">return</span> Greet;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>main.js用来把Greeter模块返回的节点插入页面。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//main.js </span></div><div class="line"><span class="keyword">var</span> Greeter = <span class="built_in">require</span>(<span class="string">'./Greeter.js'</span>);</div><div class="line"><span class="built_in">document</span>.getElementById(<span class="string">'root'</span>).appendChild(Greeter());</div></pre></td></tr></table></figure>
+<h3 id="命令行中使用"><a href="#命令行中使用" class="headerlink" title="命令行中使用"></a>命令行中使用</h3><p>webpack可以在终端中使用，只需要指定一个入口文件，webpack将自动识别项目所依赖的其它文件，不过需要注意的是如果你的webpack没有进行全局安装，那么当你在终端中使用此命令时，需要额外指定其在node_modules中的地址，<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">// 全局安装  语法:webpack entryfile bundlefile</div><div class="line">$ webpack app/main.js public/bundle.js</div><div class="line"></div><div class="line">// 非全局安装</div><div class="line">$ node_modules/.bin/webpack app/main.js public/bundle.js</div></pre></td></tr></table></figure></p>
+<p>结果如下：<br><img src="/images/1/5.PNG" alt="Alt text"></p>
+<p>可以看出webpack同时编译了main.js 和Greeter,js,现在打开index.html,可以看到如下结果<br><img src="/images/1/6.PNG" alt="Alt text"></p>
+<p>有没有很激动，已经成功的使用Webpack打包了一个文件了。不过如果在终端中进行复杂的操作，还是不太方便且容易出错的，接下来看看Webpack的另一种使用方法。</p>
+<h3 id="配置文件使用"><a href="#配置文件使用" class="headerlink" title="配置文件使用"></a>配置文件使用</h3><p>Webpack拥有很多其它的比较高级的功能（比如说本文后面会介绍的loaders和plugins），这些功能其实都可以通过命令行模式实现，但是正如已经提到的，这样不太方便且容易出错的，一个更好的办法是定义一个配置文件，这个配置文件其实也是一个简单的JavaScript模块，可以把所有的与构建相关的信息放在里面。</p>
+<p>还是继续上面的例子来说明如何写这个配置文件，在当前练习文件夹的根目录下新建一个名为webpack.config.js的文件，并在其中进行最最简单的配置，如下所示，它包含入口文件路径和存放打包后文件的地方的路径。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">module</span>.exports = &#123;</div><div class="line">  <span class="attr">entry</span>:  __dirname + <span class="string">"/app/main.js"</span>,<span class="comment">//已多次提及的唯一入口文件</span></div><div class="line">  output: &#123;</div><div class="line">    <span class="attr">path</span>: __dirname + <span class="string">"/public"</span>,<span class="comment">//打包后的文件存放的地方</span></div><div class="line">    filename: <span class="string">"bundle.js"</span><span class="comment">//打包后输出文件的文件名</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注</strong>：“__dirname”是node.js中的一个全局变量，它指向当前执行脚本所在的目录。</p>
+</blockquote>
+<p>现在如果你需要打包文件只需要在终端里你运行webpack(非全局安装需使用node_modules/.bin/webpack)命令就可以了，webpack会自动参考webpack.config.js文件中的配置选项打包你的项目，输出结果如下<br><img src="/images/1/7.PNG" alt="Alt text"></p>
+<h3 id="开发者工具"><a href="#开发者工具" class="headerlink" title="开发者工具"></a>开发者工具</h3><p>想不想让你的浏览器监测你都代码的修改，并自动刷新修改后的结果，其实Webpack提供一个可选的本地开发服务器，这个本地服务器基于node.js构建，可以实现你想要的这些功能，不过它是一个单独的组件，在webpack中进行配置之前需要单独安装它作为项目依赖<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ npm install webpack-dev-server --save-dev</div></pre></td></tr></table></figure></p>
+<p>继续把这些命令加到webpack的配置文件中，现在的配置文件如下所示<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">module</span>.exports = &#123;</div><div class="line">  <span class="attr">devtool</span>: <span class="string">'eval-source-map'</span>,</div><div class="line"></div><div class="line">  <span class="attr">entry</span>:  __dirname + <span class="string">"/app/main.js"</span>,</div><div class="line">  <span class="attr">output</span>: &#123;</div><div class="line">    <span class="attr">path</span>: __dirname + <span class="string">"/public"</span>,</div><div class="line">    <span class="attr">filename</span>: <span class="string">"bundle.js"</span></div><div class="line">  &#125;,</div><div class="line"></div><div class="line">  <span class="attr">devServer</span>: &#123;</div><div class="line">    <span class="attr">contentBase</span>: <span class="string">"./public"</span>,<span class="comment">//本地服务器所加载的页面所在的目录</span></div><div class="line">    colors: <span class="literal">true</span>,<span class="comment">//终端中输出结果为彩色</span></div><div class="line">    historyApiFallback: <span class="literal">true</span>,<span class="comment">//不跳转</span></div><div class="line">    inline: <span class="literal">true</span><span class="comment">//实时刷新</span></div><div class="line">  &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="webpack生成Source-Maps（方便调试）"><a href="#webpack生成Source-Maps（方便调试）" class="headerlink" title="webpack生成Source Maps（方便调试）"></a>webpack生成Source Maps（方便调试）</h2><p>开发总是离不开调试，如果可以更加方便的调试当然就能提高开发效率，不过打包后的文件有时候你是不容易找到出错了的地方对应的源代码的位置的，Source Maps就是来帮我们解决这个问题的。<br>通过简单的配置后，Webpack在打包时可以为我们生成的source maps，这为我们提供了一种对应编译文件和源文件的方法，使得编译后的代码可读性更高，也更容易调试。</p>
+<p>在webpack的配置文件中配置source maps，需要配置devtool，它有以下四种不同的配置选项，各具优缺点，描述如下：</p>
+<h2 id="webpack常用加载器"><a href="#webpack常用加载器" class="headerlink" title="webpack常用加载器"></a>webpack常用加载器</h2><p>Loaders是webpack中最让人激动人心的功能之一了。通过使用不同的loader，webpack通过调用外部的脚本或工具可以对各种各样的格式的文件进行处理，比如说分析JSON文件并把它转换为JavaScript文件，或者说把下一代的JS文件（ES6，ES7)转换为现代浏览器可以识别的JS文件。或者说对React的开发而言，合适的Loaders可以把React的JSX文件转换为JS文件。</p>
+<p>Loaders需要单独安装并且需要在webpack.config.js下的modules关键字下进行配置，Loaders的配置选项包括以下几方面：</p>
+<ul>
+<li>test：一个匹配loaders所处理的文件的拓展名的正则表达式（必须）</li>
+<li>loader：loader的名称（必须）</li>
+<li>include/exclude:手动添加必须处理的文件（文件夹）或屏蔽不需要处理的文件（文件夹）（可选）；</li>
+<li>query：为loaders提供额外的设置选项（可选）</li>
+</ul>
+<h3 id="json相关"><a href="#json相关" class="headerlink" title="json相关"></a>json相关</h3><p>继续上面的例子，我们把Greeter.js里的问候消息放在一个单独的JSON文件里,并通过合适的配置使Greeter.js可以读取该JSON文件的值，配置方法如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//安装可以装换JSON的loader</div><div class="line">$ npm install --save-dev json-loader</div></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">module</span>.exports = &#123;</div><div class="line">  <span class="attr">devtool</span>: <span class="string">'eval-source-map'</span>,</div><div class="line"></div><div class="line">  <span class="attr">entry</span>:  __dirname + <span class="string">"/app/main.js"</span>,</div><div class="line">  <span class="attr">output</span>: &#123;</div><div class="line">    <span class="attr">path</span>: __dirname + <span class="string">"/public"</span>,</div><div class="line">    <span class="attr">filename</span>: <span class="string">"bundle.js"</span></div><div class="line">  &#125;,</div><div class="line"></div><div class="line">  <span class="attr">module</span>: &#123;<span class="comment">//在配置文件里添加JSON loader</span></div><div class="line">    loaders: [</div><div class="line">      &#123;</div><div class="line">        <span class="attr">test</span>: <span class="regexp">/\.json$/</span>,</div><div class="line">        <span class="attr">loader</span>: <span class="string">"json"</span></div><div class="line">      &#125;</div><div class="line">    ]</div><div class="line">  &#125;,</div><div class="line"></div><div class="line">  <span class="attr">devServer</span>: &#123;</div><div class="line">    <span class="attr">contentBase</span>: <span class="string">"./public"</span>,</div><div class="line">    <span class="attr">colors</span>: <span class="literal">true</span>,</div><div class="line">    <span class="attr">historyApiFallback</span>: <span class="literal">true</span>,</div><div class="line">    <span class="attr">inline</span>: <span class="literal">true</span></div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"><span class="string">``</span><span class="string">` </span></div><div class="line">创建带有问候信息的JSON文件(命名为config.json)</div><div class="line">`<span class="string">``</span> json</div><div class="line"><span class="comment">//config.json</span></div><div class="line">&#123;</div><div class="line">  <span class="string">"greetText"</span>: <span class="string">"Hi there and greetings from JSON!"</span></div><div class="line">&#125;</div><div class="line"><span class="string">``</span><span class="string">` </span></div><div class="line">更新后的Greeter.js</div><div class="line">`<span class="string">``</span> javascript</div><div class="line"><span class="keyword">var</span> config = <span class="built_in">require</span>(<span class="string">'./config.json'</span>);</div><div class="line"></div><div class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> greet = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</div><div class="line">  greet.textContent = config.greetText;</div><div class="line">  <span class="keyword">return</span> greet;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="css相关"><a href="#css相关" class="headerlink" title="css相关"></a>css相关</h3><p>webpack提供两个工具处理样式表，css-loader 和 style-loader，二者处理的任务不同，css-loader使你能够使用类似@import 和 url(…)的方法实现 require()的功能,style-loader将所有的计算后的样式加入页面中，二者组合在一起使你能够把样式表嵌入webpack打包后的JS文件中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">// 安装</div><div class="line">$ npm install --save-dev style-loader css-loader</div></pre></td></tr></table></figure></p>
+<p>继续上面的例子<br>接下来，在app文件夹里创建一个名字为”main.css”的文件，对一些元素设置样式<br><figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">html</span> &#123;</div><div class="line">  <span class="attribute">box-sizing</span>: border-box;</div><div class="line">  <span class="attribute">-ms-text-size-adjust</span>: <span class="number">100%</span>;</div><div class="line">  <span class="attribute">-webkit-text-size-adjust</span>: <span class="number">100%</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">*, *<span class="selector-pseudo">:before</span>, *<span class="selector-pseudo">:after</span> &#123;</div><div class="line">  <span class="attribute">box-sizing</span>: inherit;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="selector-tag">body</span> &#123;</div><div class="line">  <span class="attribute">margin</span>: <span class="number">0</span>;</div><div class="line">  <span class="attribute">font-family</span>: <span class="string">'Helvetica Neue'</span>, Helvetica, Arial, sans-serif;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="selector-tag">h1</span>, <span class="selector-tag">h2</span>, <span class="selector-tag">h3</span>, <span class="selector-tag">h4</span>, <span class="selector-tag">h5</span>, <span class="selector-tag">h6</span>, <span class="selector-tag">p</span>, <span class="selector-tag">ul</span> &#123;</div><div class="line">  <span class="attribute">margin</span>: <span class="number">0</span>;</div><div class="line">  <span class="attribute">padding</span>: <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>webpack.config.js配置文件现在更新如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">module</span>.exports = &#123;</div><div class="line">  <span class="attr">devtool</span>: <span class="string">'eval-source-map'</span>,</div><div class="line"></div><div class="line">  <span class="attr">entry</span>: __dirname + <span class="string">"/app/main.js"</span>,</div><div class="line">  <span class="attr">output</span>: &#123;</div><div class="line">    <span class="attr">path</span>: __dirname + <span class="string">"/public"</span>,</div><div class="line">    <span class="attr">filename</span>: <span class="string">"bundle.js"</span></div><div class="line">  &#125;,</div><div class="line"></div><div class="line">  <span class="attr">module</span>: &#123; <span class="comment">//在配置文件里添加JSON loader</span></div><div class="line">    loaders: [</div><div class="line">      &#123;</div><div class="line">        <span class="attr">test</span>: <span class="regexp">/\.json$/</span>,</div><div class="line">        <span class="attr">loader</span>: <span class="string">"json"</span></div><div class="line">      &#125;,</div><div class="line">      &#123;</div><div class="line">        <span class="attr">test</span>: <span class="regexp">/\.js$/</span>,</div><div class="line">        <span class="attr">exclude</span>: <span class="regexp">/node_modules/</span>,</div><div class="line">        <span class="attr">loader</span>: <span class="string">'babel'</span></div><div class="line">      &#125;,</div><div class="line">      &#123;</div><div class="line">        <span class="attr">test</span>: <span class="regexp">/\.css$/</span>,</div><div class="line">        <span class="attr">loader</span>: <span class="string">"style-loader!css-loader"</span> <span class="comment">//添加对样式表的处理</span></div><div class="line">      &#125;</div><div class="line">    ]</div><div class="line">  &#125;,</div><div class="line"></div><div class="line">  <span class="attr">devServer</span>: &#123;</div><div class="line">    <span class="attr">contentBase</span>: <span class="string">"./public"</span>,</div><div class="line">    <span class="attr">colors</span>: <span class="literal">true</span>,</div><div class="line">    <span class="attr">historyApiFallback</span>: <span class="literal">true</span>,</div><div class="line">    <span class="attr">inline</span>: <span class="literal">true</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p><strong>注</strong>：感叹号的作用在于使同一文件能够使用不同类型的加载器（loader）</p>
+</blockquote>
+<p>webpack只有单一的入口，其它的模块需要通过 import, require, url等导入相关位置，为了让webpack能找到”main.css“文件，我们把它导入”main.js “中，如下<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//main.js </span></div><div class="line"><span class="keyword">var</span> css = <span class="built_in">require</span>(<span class="string">"./main.css"</span>);</div><div class="line"></div><div class="line"><span class="keyword">var</span> greeter = <span class="built_in">require</span>(<span class="string">'./Greeter.js'</span>);</div><div class="line"><span class="built_in">document</span>.getElementById(<span class="string">'root'</span>).appendChild(greeter());</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>通常情况下，css会和js打包到同一个文件中，并不会打包为一个单独的css文件，不过通过合适的配置webpack也可以把css打包为单独的文件的。不过这也只是webpack把css当做模块而已，咱们继续看看一个真的CSS模块的实践。</p>
+</blockquote>
+<h3 id="js相关"><a href="#js相关" class="headerlink" title="js相关"></a>js相关</h3><p>babel编译器</p>
+<h2 id="webpack常用插件"><a href="#webpack常用插件" class="headerlink" title="webpack常用插件"></a>webpack常用插件</h2><p>… 未完待续…</p>
+<h2 id="反馈与建议"><a href="#反馈与建议" class="headerlink" title="反馈与建议"></a>反馈与建议</h2><ul>
+<li>微博：<a href="http://weibo.com/u/5472985831" target="_blank" rel="external">@devSteven</a></li>
+<li>邮箱：<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#x3a;&#99;&#x72;&#97;&#x7a;&#x79;&#98;&#111;&#121;&#x71;&#x69;&#97;&#x6e;&#x67;&#64;&#49;&#x36;&#51;&#x2e;&#x63;&#x6f;&#x6d;">&#99;&#x72;&#97;&#x7a;&#x79;&#98;&#111;&#121;&#x71;&#x69;&#97;&#x6e;&#x67;&#64;&#49;&#x36;&#51;&#x2e;&#x63;&#x6f;&#x6d;</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;webpack简介&quot;&gt;&lt;a href=&quot;#webpack简介&quot; class=&quot;headerlink&quot; title=&quot;webpack简介&quot;&gt;&lt;/a&gt;webpack简介&lt;/h2&gt;&lt;h3 id=&quot;为什么要使用webpack&quot;&gt;&lt;a href=&quot;#为什么要使用webpac
+    
+    </summary>
+    
+      <category term="前台开发" scheme="http://yoursite.com/categories/frontend/"/>
+    
+    
+      <category term="模块化" scheme="http://yoursite.com/tags/%E6%A8%A1%E5%9D%97%E5%8C%96/"/>
+    
+      <category term="打包" scheme="http://yoursite.com/tags/%E6%89%93%E5%8C%85/"/>
+    
+  </entry>
+  
+</feed>

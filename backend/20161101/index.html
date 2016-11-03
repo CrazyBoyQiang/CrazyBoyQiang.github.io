@@ -1,0 +1,701 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.useso.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Oracle,数据库,备份还原," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Steven的技术博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库的备份还原和数据库的迁移，还可以实现快速搭建主从库。
+
+注：导入导出dmp数据时需要有导出表的权限的用户，否则不能导出。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oracle数据库备份和还原(导入导出)">
+<meta property="og:url" content="http://yoursite.com/backend/20161101/index.html">
+<meta property="og:site_name" content="Steven的技术博客">
+<meta property="og:description" content="之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库的备份还原和数据库的迁移，还可以实现快速搭建主从库。
+
+注：导入导出dmp数据时需要有导出表的权限的用户，否则不能导出。">
+<meta property="og:image" content="http://yoursite.com/images/20161101/2222.PNG">
+<meta property="og:updated_time" content="2016-11-02T01:18:13.730Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oracle数据库备份和还原(导入导出)">
+<meta name="twitter:description" content="之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库的备份还原和数据库的迁移，还可以实现快速搭建主从库。
+
+注：导入导出dmp数据时需要有导出表的权限的用户，否则不能导出。">
+<meta name="twitter:image" content="http://yoursite.com/images/20161101/2222.PNG">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 3109763,
+      author: 'Charles0429'
+    }
+  };
+</script>
+
+  <title> Oracle数据库备份和还原(导入导出) | Steven的技术博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?5ae826804c6e21274dd00d0b666bc666";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Steven的技术博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Oracle数据库备份和还原(导入导出)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-01T16:35:11+08:00" content="2016-11-01">
+              2016-11-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/backend/" itemprop="url" rel="index">
+                    <span itemprop="name">后台开发</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/backend/20161101/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="backend/20161101/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前一直学习使用MySQL和MongoDB，没有机会接触Oracle，最近做的项目使用的是Oracle数据库，由于最近数据库服务器不是很稳定，BOSS就让按时备份一下数据库，再次整理一下自己在对Oracle数据库进行导入导出的操作，利用数据库的导入导出可以很方便就实现数据库的备份还原和数据库的迁移，还可以实现快速搭建主从库。</p>
+<blockquote>
+<p><strong>注</strong>：导入导出dmp数据时需要有导出表的权限的用户，否则不能导出。</p>
+</blockquote>
+<hr>
+<h2 id="配置文件tnsname-ora"><a href="#配置文件tnsname-ora" class="headerlink" title="配置文件tnsname.ora"></a>配置文件tnsname.ora</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">SD_162 =</div><div class="line">  (DESCRIPTION =</div><div class="line">    (ADDRESS_LIST =</div><div class="line">      (ADDRESS = (PROTOCOL = TCP)(HOST = 172.16.10.162)(PORT = 1521))</div><div class="line">    )</div><div class="line">    (CONNECT_DATA =</div><div class="line">      (SID = ORCL)</div><div class="line">    )</div><div class="line">  )</div></pre></td></tr></table></figure>
+<p>SD_162 即是我们要使用的数据库的别名。</p>
+<h2 id="测试连接"><a href="#测试连接" class="headerlink" title="测试连接"></a>测试连接</h2><p>为了验证能否成功连接到数据库，可以使用tnsping命令测试一下连接，如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ tnsping SD_162</div></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">TNS Ping Utility <span class="keyword">for</span> 64-bit Windows: Version 11.2.0.3.0 - Production on 01-11月-2016 16:45:43</div><div class="line"></div><div class="line">Copyright (c) 1997, 2011, Oracle.  All rights reserved.</div><div class="line"></div><div class="line">已使用的参数文件:</div><div class="line">E:\Oracle\product\11.2.0\dbhome_1\network\admin\sqlnet.ora</div><div class="line"></div><div class="line"></div><div class="line">已使用 TNSNAMES 适配器来解析别名</div><div class="line">尝试连接 (DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.16.1.162)(PORT = 1521))) (CONNECT_DATA = (SID = ORCL1)))</div><div class="line">OK (10 毫秒)</div></pre></td></tr></table></figure>
+<p>出现OK，即连接成功，接下来就可以开始导入导出了</p>
+<h2 id="数据库导出"><a href="#数据库导出" class="headerlink" title="数据库导出"></a>数据库导出</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 导出dmp文件</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp</div><div class="line"></div><div class="line">// 导出sql文件</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.sql</div><div class="line"></div><div class="line">// 全部导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp </div><div class="line">full=y</div><div class="line"></div><div class="line">// 将数据库中<span class="built_in">test</span>用户与<span class="built_in">test</span>1用户的表导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp owner=(<span class="built_in">test</span>,<span class="built_in">test</span>1)</div><div class="line"></div><div class="line">// 将数据库中的表table1 、table2导出</div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp tables=(table1,table2)</div><div class="line"></div><div class="line">// 加入条件</div><div class="line">// 将数据库中的表table1中的字段filed1以<span class="string">"00"</span>打头的数据导出 </div><div class="line">$ exp 用户名/密码@SD_162  file=D:\sd1621101.dmp tables=table1 query=\<span class="string">" where filed1 like '00%'\"</span></div></pre></td></tr></table></figure>
+<p> 上面是常用的导出，对于压缩，用winzip把dmp文件可以很好的压缩。不过在上面命令后面加上 compress=y  就可以了<br> 出现如下信息，没有警告的话，就是导出成功了。<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Export: Release 11.2.0.3.0 - Production on 星期二 11月 1 16:21:15 2016</div><div class="line"></div><div class="line">Copyright (c) 1982, 2011, Oracle and/or its affiliates.  All rights reserved.</div><div class="line"></div><div class="line"></div><div class="line">连接到: Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production</div><div class="line">With the Partitioning, OLAP, Data Mining and Real Application Testing options</div><div class="line">已导出 ZHS16GBK 字符集和 AL16UTF16 NCHAR 字符集</div><div class="line"></div><div class="line">即将导出指定的表通过常规路径...</div><div class="line">. . 正在导出表                            AA10导出了        4114 行</div><div class="line">成功终止导出, 没有出现警告。</div></pre></td></tr></table></figure></p>
+<h2 id="数据库导入"><a href="#数据库导入" class="headerlink" title="数据库导入"></a>数据库导入</h2><p> 将<strong>D:\sd1621101.dmp</strong>中的数据导入 TEST数据库中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// 下面可能有点问题，因为有的表已经存在，然后它就报错，忽略该表在后面加上 ignore=y 就可以了</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp full=y</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp ignore=y</div><div class="line"></div><div class="line">// 导入table1,table2表</div><div class="line">$ imp 用户名/密码@TEST file=D:\sd1621101.dmp tables=(table1,table2)</div></pre></td></tr></table></figure></p>
+<h2 id="利用PL-SQL-Developer工具"><a href="#利用PL-SQL-Developer工具" class="headerlink" title="利用PL/SQL Developer工具"></a>利用PL/SQL Developer工具</h2><p>菜单栏—-&gt;工具—-&gt;导入表/导出表，如下图，选好要导出的表，设置好导出文件即可<br><img src="/images/20161101/2222.PNG" alt="Alt text"></p>
+<p>… 完结…</p>
+<h2 id="反馈与建议"><a href="#反馈与建议" class="headerlink" title="反馈与建议"></a>反馈与建议</h2><ul>
+<li>微博：<a href="http://weibo.com/u/5472985831" target="_blank" rel="external">@devSteven</a></li>
+<li>邮箱：<a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#x3a;&#99;&#x72;&#97;&#122;&#x79;&#98;&#111;&#121;&#113;&#105;&#x61;&#x6e;&#x67;&#64;&#49;&#x36;&#x33;&#x2e;&#x63;&#111;&#109;">&#99;&#x72;&#97;&#122;&#x79;&#98;&#111;&#121;&#113;&#105;&#x61;&#x6e;&#x67;&#64;&#49;&#x36;&#x33;&#x2e;&#x63;&#111;&#109;</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Oracle/" rel="tag">#Oracle</a>
+          
+            <a href="/tags/数据库/" rel="tag">#数据库</a>
+          
+            <a href="/tags/备份还原/" rel="tag">#备份还原</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/frontend/20161026/" rel="next" title="Javascript模块化编程一">
+                <i class="fa fa-chevron-left"></i> Javascript模块化编程一
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/frontend/20161102/" rel="prev" title="js正则表达式RegExp">
+                js正则表达式RegExp <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="backend/20161101/"
+           data-title="Oracle数据库备份和还原(导入导出)" data-url="http://yoursite.com/backend/20161101/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Steven" />
+          <p class="site-author-name" itemprop="name">Steven</p>
+          <p class="site-description motion-element" itemprop="description">好代码像粥一样,都是用时间熬出来的</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/crazyboyqiang" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/5472985831" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://blog.csdn.net/u013904458" target="_blank" title="CSDN">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  CSDN
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件tnsname-ora"><span class="nav-number">1.</span> <span class="nav-text">配置文件tnsname.ora</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试连接"><span class="nav-number">2.</span> <span class="nav-text">测试连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库导出"><span class="nav-number">3.</span> <span class="nav-text">数据库导出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库导入"><span class="nav-number">4.</span> <span class="nav-text">数据库导入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利用PL-SQL-Developer工具"><span class="nav-number">5.</span> <span class="nav-text">利用PL/SQL Developer工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反馈与建议"><span class="nav-number">6.</span> <span class="nav-text">反馈与建议</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Steven</span>
+</div>
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"crazyboyqiang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
